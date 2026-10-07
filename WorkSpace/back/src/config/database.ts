@@ -18,8 +18,8 @@ export const iniciarBanco = async (): Promise<void> => {
   try {
     // Faz uma consulta rápida para checar se o PostgreSQL está respondendo
     await conexaoBanco.query('SELECT NOW()');
-    console.log('🔥 Banco de dados PostgreSQL conectado com sucesso!');
+    console.log('Banco de dados PostgreSQL conectado com sucesso!');
   } catch (erro) {
-    console.error('❌ Erro crítico ao conectar no banco de dados:', erro);
+    console.error('Erro crítico ao conectar no banco de dados:', erro);
   }
 };

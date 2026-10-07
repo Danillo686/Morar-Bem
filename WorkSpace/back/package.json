@@ -1,10 +1,8 @@
-
-
 {
   "name": "back",
   "version": "1.0.0",
   "main": "src/server.ts",
-  "type": "module", 
+  "type": "module",
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
