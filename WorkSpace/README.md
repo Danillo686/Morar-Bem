@@ -33,7 +33,9 @@ Execute `npm install` e `npm run dev`. O proxy do Vite encaminha `/api` para a A
 
 Na vitrine, o frontend tenta primeiro a API Rust. Se ela falhar (incluindo erros de rede ou CORS), consulta os imóveis diretamente no Supabase e também registra leads por lá. Para habilitar esse modo, execute novamente `supabase/schema.sql` no SQL Editor: ele concede leitura pública apenas de imóveis e inserção de leads, sem permitir a leitura pública dos telefones cadastrados. Configure também a origem de produção do frontend em `FRONTEND_ORIGIN` na API para o caminho normal sem fallback funcionar.
 
-O painel **Cadastros > Novo Cliente** contém os campos obrigatórios nome, e-mail e telefone. O formulário está em modo de demonstração e não persiste clientes, conforme o escopo escolhido. A vitrine pública existente permanece disponível em `/vitrine`.
+A página pública `/cadastro` permite que clientes enviem nome, e-mail e telefone sem criar conta. O envio exige consentimento para contato e grava na tabela `clientes` usando a chave publishable. Execute novamente `supabase/schema.sql` no SQL Editor para criar a tabela e a política RLS de inserção pública. A chave anônima não pode consultar nem listar os cadastros. Esta inscrição pública pode receber spam; para tráfego público em produção, considere adicionar CAPTCHA/rate limiting antes de promovê-la.
+
+O painel **Cadastros > Novo Cliente** continua em modo de demonstração; ele não persiste registros. A página pública `/cadastro` é o fluxo que salva os dados no Supabase.
 
 ## Implantação na Vercel
 

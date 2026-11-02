@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import type { Session, SupabaseClient } from "@supabase/supabase-js";
-import { criarLead, listarImoveis } from "./servicos/dados";
+import { cadastrarCliente, criarLead, listarImoveis } from "./servicos/dados";
 import { supabase } from "./servicos/supabase";
 import type { Imovel } from "./types";
 import "./App.css";
@@ -14,6 +14,9 @@ function App() {
   const currentPath = window.location.pathname.replace(/\/+$/, "") || "/";
   if (currentPath === "/vitrine") {
     return <VitrinePublica />;
+  }
+  if (currentPath === "/cadastro") {
+    return <CadastroCliente />;
   }
 
   return <Portal />;
@@ -490,7 +493,10 @@ function VitrinePublica() {
     <main className="showcase-page">
       <header className="showcase-header">
         <a className="brand" href="/"><span className="brand-mark">M</span><span className="brand-copy"><strong>morar<span>bem</span></strong><small>IMOBILIÁRIA</small></span></a>
-        <a className="button button-primary showcase-login" href="/">Acesso do corretor <span aria-hidden="true">→</span></a>
+        <nav className="showcase-actions" aria-label="Acesso">
+          <a className="button button-secondary showcase-register" href="/cadastro">Cadastre-se</a>
+          <a className="button button-primary showcase-login" href="/">Acesso do corretor <span aria-hidden="true">→</span></a>
+        </nav>
       </header>
       <section className="showcase-hero">
         <span className="eyebrow">ENCONTRE SEU PRÓXIMO CAPÍTULO</span>
@@ -529,6 +535,128 @@ function VitrinePublica() {
           <button className="button button-primary" type="submit">Enviar meu contato <span aria-hidden="true">→</span></button>
         </form>
       )}
+      <footer className="showcase-footer">© 2026 Morar Bem Imobiliária.</footer>
+    </main>
+  );
+}
+
+function CadastroCliente() {
+  const [nome, setNome] = useState("");
+  const [email, setEmail] = useState("");
+  const [telefone, setTelefone] = useState("");
+  const [consentimentoContato, setConsentimentoContato] = useState(false);
+  const [feedback, setFeedback] = useState<Feedback | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setFeedback(null);
+    setBusy(true);
+
+    try {
+      await cadastrarCliente({ nome, email, telefone, consentimentoContato });
+      setNome("");
+      setEmail("");
+      setTelefone("");
+      setConsentimentoContato(false);
+      setFeedback({
+        type: "success",
+        message: "Cadastro recebido! Nossa equipe poderá entrar em contato com você.",
+      });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Não foi possível concluir o cadastro.";
+      setFeedback({ type: "error", message });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <main className="registration-page">
+      <header className="showcase-header registration-header">
+        <a className="brand" href="/vitrine">
+          <span className="brand-mark">M</span>
+          <span className="brand-copy"><strong>morar<span>bem</span></strong><small>IMOBILIÁRIA</small></span>
+        </a>
+        <a className="registration-login-link" href="/">Acesso do corretor <span aria-hidden="true">→</span></a>
+      </header>
+
+      <section className="registration-content">
+        <a className="registration-back" href="/vitrine"><span aria-hidden="true">←</span> Voltar para os imóveis</a>
+        <div className="registration-heading">
+          <span className="eyebrow">VAMOS CONVERSAR</span>
+          <h1>Cadastre-se sem criar uma conta.</h1>
+          <p>Deixe seus dados e nossa equipe entra em contato para ajudar você a encontrar seu próximo imóvel.</p>
+        </div>
+
+        <form className="registration-card" onSubmit={submit}>
+          <div className="card-heading">
+            <span className="card-icon" aria-hidden="true">♙</span>
+            <div><h2>Seus dados</h2><p>Preencha os campos obrigatórios para continuar.</p></div>
+          </div>
+
+          <div className="registration-fields">
+            <label className="field">
+              <span>Nome completo <b>*</b></span>
+              <input
+                type="text"
+                name="name"
+                autoComplete="name"
+                minLength={2}
+                maxLength={120}
+                placeholder="Ex.: Maria da Silva"
+                value={nome}
+                onChange={(event) => setNome(event.target.value)}
+                required
+              />
+            </label>
+            <label className="field">
+              <span>E-mail <b>*</b></span>
+              <input
+                type="email"
+                name="email"
+                autoComplete="email"
+                maxLength={254}
+                placeholder="Ex.: maria@email.com"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                required
+              />
+            </label>
+            <label className="field">
+              <span>Telefone <b>*</b></span>
+              <input
+                type="tel"
+                name="telephone"
+                autoComplete="tel"
+                inputMode="tel"
+                placeholder="(11) 99999-9999"
+                value={telefone}
+                onChange={(event) => setTelefone(event.target.value)}
+                required
+              />
+            </label>
+          </div>
+
+          <label className="consent-field">
+            <input
+              type="checkbox"
+              checked={consentimentoContato}
+              onChange={(event) => setConsentimentoContato(event.target.checked)}
+              required
+            />
+            <span>Autorizo a Morar Bem a usar meus dados para entrar em contato sobre imóveis e atendimento.</span>
+          </label>
+
+          {feedback && <div className={`feedback feedback-${feedback.type}`} role="status">{feedback.message}</div>}
+
+          <button className="button button-save registration-submit" type="submit" disabled={busy}>
+            {busy ? "Enviando..." : "Enviar cadastro"}
+            {!busy && <span aria-hidden="true">→</span>}
+          </button>
+          <p className="registration-note">Este cadastro não cria usuário nem senha. Seus dados não ficam visíveis publicamente.</p>
+        </form>
+      </section>
       <footer className="showcase-footer">© 2026 Morar Bem Imobiliária.</footer>
     </main>
   );

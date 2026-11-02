@@ -9,6 +9,13 @@ export interface DataResult<T> {
   source: DataSource;
 }
 
+export interface ClienteCadastro {
+  nome: string;
+  email: string;
+  telefone: string;
+  consentimentoContato: boolean;
+}
+
 interface ApiPropertyList {
   data: Imovel[];
 }
@@ -94,4 +101,38 @@ export async function criarLead(
     data: "Interesse registrado com sucesso!",
     source: "supabase",
   };
+}
+
+export async function cadastrarCliente(cliente: ClienteCadastro): Promise<void> {
+  const nome = cliente.nome.trim();
+  const email = cliente.email.trim().toLowerCase();
+  const telefone = cliente.telefone.replace(/\D/g, "");
+
+  if (nome.length < 2 || nome.length > 120) {
+    throw new Error("Informe um nome com pelo menos 2 caracteres.");
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    throw new Error("Informe um e-mail válido.");
+  }
+  if (telefone.length < 10 || telefone.length > 11) {
+    throw new Error("O telefone deve ter 10 ou 11 dígitos.");
+  }
+  if (!cliente.consentimentoContato) {
+    throw new Error("É necessário autorizar o contato para continuar.");
+  }
+  if (!supabase) {
+    throw new Error("Cadastro temporariamente indisponível. Tente novamente mais tarde.");
+  }
+
+  const { error } = await supabase.from("clientes").insert({
+    nome,
+    email,
+    telefone,
+    consentimento_contato: cliente.consentimentoContato,
+  });
+
+  if (error) {
+    console.error("Falha ao salvar cadastro de cliente no Supabase:", error);
+    throw new Error("Não foi possível salvar seu cadastro. Tente novamente mais tarde.");
+  }
 }
