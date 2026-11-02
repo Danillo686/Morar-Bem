@@ -29,7 +29,7 @@ Em `front`, copie `.env.example` para `.env.local` e configure `VITE_SUPABASE_UR
 
 No Supabase, habilite o provedor de e-mail em Authentication e adicione as URLs locais e de produção à lista de URLs de redirecionamento. O login usa contas existentes; a tela **Esqueci minha senha** envia o e-mail de recuperação pelo Supabase Auth. Não há cadastro público de contas.
 
-Execute `npm install` e `npm run dev`. O proxy do Vite encaminha `/api` para a API local na porta 3000. Na implantação separada, defina `VITE_API_URL` como a URL pública do projeto Vercel da API, sem uma barra final.
+Execute `npm install` e `npm run dev`. O proxy do Vite encaminha `/api` para a API local na porta 3000. Na implantação separada, defina `VITE_API_URL` somente como a origem pública do projeto Vercel da API (por exemplo, `https://morar-bem-back.vercel.app`), sem `/api/lista` ou `/api/lead`. O frontend usa essas rotas nos próprios pedidos.
 
 O painel **Cadastros > Novo Cliente** contém os campos obrigatórios nome, e-mail e telefone. O formulário está em modo de demonstração e não persiste clientes, conforme o escopo escolhido. A vitrine pública existente permanece disponível em `/vitrine`.
 
@@ -37,7 +37,7 @@ O painel **Cadastros > Novo Cliente** contém os campos obrigatórios nome, e-ma
 
 Crie dois projetos ligados ao mesmo repositório:
 
-1. **API:** defina o Root Directory como `WorkSpace/back`. O runtime Rust detecta as funções em `api/`. Configure `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` e `FRONTEND_ORIGIN` nas variáveis do projeto. Use a URL pública do frontend como origem permitida.
+1. **API:** defina o Root Directory como `WorkSpace/back`. O runtime Rust detecta as funções em `api/`. Configure `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` e `FRONTEND_ORIGIN` nas variáveis do projeto. Use a origem pública exata do frontend, por exemplo `https://morar-bem-ball.vercel.app`, sem caminho nem barra final.
 2. **Frontend:** defina o Root Directory como `WorkSpace/front`. Use o framework Vite e configure `VITE_API_URL`, `VITE_SUPABASE_URL` e `VITE_SUPABASE_PUBLISHABLE_KEY`. O `vercel.json` desse diretório redireciona rotas da SPA, como `/vitrine`, para o frontend. Cadastre também a URL do frontend em Authentication > URL Configuration no Supabase. Essas variáveis são aplicadas durante o build; faça um novo deploy após configurá-las.
 
 Mantenha `SUPABASE_SERVICE_ROLE_KEY` somente nas variáveis secretas do projeto da API; ela não deve receber o prefixo `VITE_` nem ser adicionada ao frontend.
