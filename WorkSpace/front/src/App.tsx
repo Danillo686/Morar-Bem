@@ -28,7 +28,8 @@ type Feedback = {
 };
 
 function App() {
-  if (window.location.pathname === "/vitrine") {
+  const currentPath = window.location.pathname.replace(/\/+$/, "") || "/";
+  if (currentPath === "/vitrine") {
     return <VitrinePublica />;
   }
 

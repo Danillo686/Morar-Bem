@@ -38,6 +38,6 @@ O painel **Cadastros > Novo Cliente** contém os campos obrigatórios nome, e-ma
 Crie dois projetos ligados ao mesmo repositório:
 
 1. **API:** defina o Root Directory como `WorkSpace/back`. O runtime Rust detecta as funções em `api/`. Configure `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` e `FRONTEND_ORIGIN` nas variáveis do projeto. Use a URL pública do frontend como origem permitida.
-2. **Frontend:** defina o Root Directory como `WorkSpace/front`. Use o framework Vite e configure `VITE_API_URL`, `VITE_SUPABASE_URL` e `VITE_SUPABASE_PUBLISHABLE_KEY`. Cadastre também a URL do frontend em Authentication > URL Configuration no Supabase. Essas variáveis são aplicadas durante o build; faça um novo deploy após configurá-las.
+2. **Frontend:** defina o Root Directory como `WorkSpace/front`. Use o framework Vite e configure `VITE_API_URL`, `VITE_SUPABASE_URL` e `VITE_SUPABASE_PUBLISHABLE_KEY`. O `vercel.json` desse diretório redireciona rotas da SPA, como `/vitrine`, para o frontend. Cadastre também a URL do frontend em Authentication > URL Configuration no Supabase. Essas variáveis são aplicadas durante o build; faça um novo deploy após configurá-las.
 
 Mantenha `SUPABASE_SERVICE_ROLE_KEY` somente nas variáveis secretas do projeto da API; ela não deve receber o prefixo `VITE_` nem ser adicionada ao frontend.
