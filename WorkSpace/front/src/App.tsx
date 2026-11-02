@@ -1,26 +1,9 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { isAxiosError } from "axios";
-import { createClient, type Session, type SupabaseClient } from "@supabase/supabase-js";
-import { api } from "./servicos/api";
+import type { Session, SupabaseClient } from "@supabase/supabase-js";
+import { criarLead, listarImoveis } from "./servicos/dados";
+import { supabase } from "./servicos/supabase";
 import type { Imovel } from "./types";
 import "./App.css";
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL?.trim() ?? "";
-const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY?.trim() ?? "";
-
-function isValidSupabaseUrl(value: string) {
-  try {
-    const url = new URL(value);
-    return url.protocol === "https:" && url.hostname.endsWith(".supabase.co");
-  } catch {
-    return false;
-  }
-}
-
-const supabase: SupabaseClient | null =
-  isValidSupabaseUrl(supabaseUrl) && supabaseKey
-    ? createClient(supabaseUrl, supabaseKey)
-    : null;
 
 type Feedback = {
   type: "error" | "success" | "warning";
@@ -454,14 +437,24 @@ function VitrinePublica() {
 
   useEffect(() => {
     let active = true;
-    void api
-      .get<{ data: Imovel[] }>("/api/lista")
-      .then(({ data }) => {
-        if (active) setImoveis(data.data);
+    void listarImoveis()
+      .then(({ data, source }) => {
+        if (!active) return;
+        setImoveis(data);
+        if (source === "supabase") {
+          setFeedback({
+            type: "warning",
+            message:
+              data.length > 0
+                ? "API indisponível; imóveis carregados diretamente do Supabase."
+                : "API indisponível e nenhum imóvel visível pelo acesso público. Execute supabase/schema.sql para configurar a leitura pública no Supabase.",
+          });
+        }
       })
-      .catch(() => {
+      .catch((error: unknown) => {
         if (active) {
-          setFeedback({ type: "error", message: "Não foi possível carregar os imóveis. Tente novamente." });
+          const message = error instanceof Error ? error.message : "Erro inesperado ao carregar imóveis.";
+          setFeedback({ type: "error", message });
         }
       })
       .finally(() => {
@@ -477,18 +470,19 @@ function VitrinePublica() {
     if (!imovelSelecionado) return;
     setFeedback(null);
     try {
-      const { data } = await api.post<{ message: string }>("/api/lead", {
-        codigo_imovel: imovelSelecionado,
-        telefone,
+      const result = await criarLead(imovelSelecionado, telefone);
+      setFeedback({
+        type: result.source === "api" ? "success" : "warning",
+        message:
+          result.source === "api"
+            ? result.data
+            : `${result.data} (registrado diretamente pelo Supabase; API indisponível.)`,
       });
-      setFeedback({ type: "success", message: data.message });
       setTelefone("");
       setImovelSelecionado(null);
-    } catch (error) {
-      const message = isAxiosError<{ message?: string }>(error)
-        ? error.response?.data?.message
-        : undefined;
-      setFeedback({ type: "error", message: message ?? "Erro ao registrar interesse." });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Erro inesperado ao registrar interesse.";
+      setFeedback({ type: "error", message });
     }
   }
 

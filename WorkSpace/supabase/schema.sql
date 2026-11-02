@@ -18,6 +18,28 @@ create table if not exists public.leads (
 alter table public.imoveis enable row level security;
 alter table public.leads enable row level security;
 
+grant usage on schema public to anon, authenticated;
+grant select on public.imoveis to anon, authenticated;
+grant insert on public.leads to anon, authenticated;
+grant usage, select on sequence public.leads_id_seq to anon, authenticated;
+
+drop policy if exists "Public can read properties" on public.imoveis;
+create policy "Public can read properties"
+    on public.imoveis
+    for select
+    to anon, authenticated
+    using (true);
+
+drop policy if exists "Public can submit leads" on public.leads;
+create policy "Public can submit leads"
+    on public.leads
+    for insert
+    to anon, authenticated
+    with check (
+        length(telefone) between 10 and 11
+        and telefone !~ '[^0-9]'
+    );
+
 insert into public.imoveis (codigo, titulo, preco)
 values
     ('AP01', 'Apartamento', 250.00),

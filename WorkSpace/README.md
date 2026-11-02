@@ -31,6 +31,8 @@ No Supabase, habilite o provedor de e-mail em Authentication e adicione as URLs 
 
 Execute `npm install` e `npm run dev`. O proxy do Vite encaminha `/api` para a API local na porta 3000. Na implantação separada, defina `VITE_API_URL` somente como a origem pública do projeto Vercel da API (por exemplo, `https://morar-bem-back.vercel.app`), sem `/api/lista` ou `/api/lead`. O frontend usa essas rotas nos próprios pedidos.
 
+Na vitrine, o frontend tenta primeiro a API Rust. Se ela falhar (incluindo erros de rede ou CORS), consulta os imóveis diretamente no Supabase e também registra leads por lá. Para habilitar esse modo, execute novamente `supabase/schema.sql` no SQL Editor: ele concede leitura pública apenas de imóveis e inserção de leads, sem permitir a leitura pública dos telefones cadastrados. Configure também a origem de produção do frontend em `FRONTEND_ORIGIN` na API para o caminho normal sem fallback funcionar.
+
 O painel **Cadastros > Novo Cliente** contém os campos obrigatórios nome, e-mail e telefone. O formulário está em modo de demonstração e não persiste clientes, conforme o escopo escolhido. A vitrine pública existente permanece disponível em `/vitrine`.
 
 ## Implantação na Vercel
